@@ -1,45 +1,83 @@
 package ru.lukymiv.doc;
 
-import org.jsoup.Connection;
+import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.WebDriverRunner;
+import io.github.bonigarcia.wdm.ChromeDriverManager;
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
-import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.openqa.selenium.WebDriver;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.io.FileUtils;
+import java.io.PrintWriter;
+
+import static com.codeborne.selenide.Selenide.$x;
+import static com.codeborne.selenide.Selenide.open;
 
 public class createHTML {
 
-
+    static String[] urls = new String[]{"General_info",
+            "Purpose_and_scope",
+            "Architecture",
+            "Architecture",
+            "Architecture",
+            "Main_page",
+            "Resource_monitor",
+            "Send_message",
+            "Queue_manager",
+            "Database",
+            "Logs",
+            "Settings",
+            "User_page",
+            "Dashboard",
+            "Web_services",
+            "REST",
+            "Transaction_monitor",
+            "REST_API",
+            "Install",
+            "Modes_exp",
+            "Attachment"};
 
     public static void main(String[] args) throws IOException {
-        String[] urls = new String[]{"http://localhost:8181/manager/#/doc/General_info",
-                "http://localhost:8181/manager/#/doc/Purpose_and_scope",
-                "http://localhost:8181/manager/#/doc/Architecture",
-                "http://localhost:8181/manager/#/doc/Architecture",
-                "http://localhost:8181/manager/#/doc/Architecture",
-                "http://localhost:8181/manager/#/doc/Main_page",
-                "http://localhost:8181/manager/#/doc/Resource_monitor",
-                "http://localhost:8181/manager/#/doc/Send_message",
-                "http://localhost:8181/manager/#/doc/Queue_manager"};
-        Connection.Response response = HttpConnection.connect("http://localhost:8181/manager/login/")
-                .data("username", "root")
-                .data("password", "root")
-                .method(Connection.Method.POST)
-                .followRedirects(true)
-                .execute();
-        Document doc = Jsoup.connect("http://localhost:8181/manager/#/doc").cookies(response.cookies()).followRedirects(true).get();
+//        downloadFiles();
+        File input = new File("C:\\Users\\wunsh\\IdeaProjects\\adminMan\\src\\main\\resources\\files\\Queue_manager.html");
+        Document doc = Jsoup.parse(input, "UTF-8", "");
         Element head = doc.head();
         Document finalDoc = Document.createShell("");
         finalDoc.select("head").append(head.html());
+        finalDoc.select("body").append("<div id=\"app\"><div class=\"body-container\"><div class=\"documentation\"></div></div></div>");
+        for (String name: urls) {
+            File data = new File("C:\\Users\\wunsh\\IdeaProjects\\adminMan\\src\\main\\resources\\files\\"+name+".html");
+            Document docData = Jsoup.parse(data, "UTF-8", "");
+            String content = docData.select("div.documentation").html();
+            finalDoc.select("div.documentation").append(content);
+        }
         final File f = new File("filename.html");
         FileUtils.writeStringToFile(f, finalDoc.outerHtml(), "UTF-8");
+        System.out.println();
 
+    }
 
+    private static void downloadFiles() throws FileNotFoundException {
+        ChromeDriverManager.getInstance().version("76.0.3809.126").setup();
+        Configuration.browser = "chrome";
+        Configuration.baseUrl = "http://127.0.0.1:8181";
+        Configuration.startMaximized = true;
+        open("/");
+        LoginPage.loginClickButton("root", "root");
+        $x("//a[@href=\"#/doc\"]").click();
+        WebDriver driver = WebDriverRunner.getWebDriver();
+        for (int i=0; i<urls.length; i++) {
+            String fileName = urls[i];
+            $x("//a[@href=\"#/doc/"+fileName+"\"]").click();
+            String data = driver.getPageSource();
+            File file = new File("C:\\Users\\wunsh\\IdeaProjects\\adminMan\\src\\main\\resources\\files\\" + fileName+".html");
+            PrintWriter printWriter = new PrintWriter(file);
+            printWriter.println(data);
+            printWriter.close();
+        }
     }
 }
