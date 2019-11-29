@@ -42,15 +42,15 @@ public class createHTML {
             "Attachment"};
 
     public static void main(String[] args) throws IOException {
-//        downloadFiles();
-        File input = new File("C:\\Users\\wunsh\\IdeaProjects\\adminMan\\src\\main\\resources\\files\\Queue_manager.html");
+        downloadFiles();
+        File input = new File("/home/michael/IdeaProjects/adminMan/src/main/recources/files/Queue_manager.html");
         Document doc = Jsoup.parse(input, "UTF-8", "");
         Element head = doc.head();
         Document finalDoc = Document.createShell("");
         finalDoc.select("head").append(head.html());
         finalDoc.select("body").append("<div id=\"app\"><div class=\"body-container\"><div class=\"documentation\"></div></div></div>");
         for (String name: urls) {
-            File data = new File("C:\\Users\\wunsh\\IdeaProjects\\adminMan\\src\\main\\resources\\files\\"+name+".html");
+            File data = new File("/home/michael/IdeaProjects/adminMan/src/main/recources/files/"+name+".html");
             Document docData = Jsoup.parse(data, "UTF-8", "");
             String content = docData.select("div.documentation").html();
             finalDoc.select("div.documentation").append(content);
@@ -74,7 +74,7 @@ public class createHTML {
             String fileName = urls[i];
             $x("//a[@href=\"#/doc/"+fileName+"\"]").click();
             String data = driver.getPageSource();
-            File file = new File("C:\\Users\\wunsh\\IdeaProjects\\adminMan\\src\\main\\resources\\files\\" + fileName+".html");
+            File file = new File("/home/michael/IdeaProjects/adminMan/src/main/recources/files/" + fileName+".html");
             PrintWriter printWriter = new PrintWriter(file);
             printWriter.println(data);
             printWriter.close();
